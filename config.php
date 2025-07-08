@@ -1,9 +1,9 @@
 <?php
-$host = "${{MySQL.MYSQLHOST}}";        
+$host = "mysql.railway.internal";        
 $port = "3306";                
 $user = "root";
-$pass = "${{MySQL.MYSQL_ROOT_PASSWORD}}";
-$dbname = "${{MySQL.MYSQL_DATABASE}}";
+$pass = "rrdsmfeUcAgQUYjXYGGtNsUkXEnsKzvQ;
+$dbname = "railway";
 
 $conn = new mysqli("$host:$port", $user, $pass, $dbname);
 
