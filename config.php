@@ -1,6 +1,6 @@
 <?php
 $host = "${{MySQL.MYSQLHOST}}";        
-$port = "${{MySQL.MYSQLPORT}}";                
+$port = "3306";                
 $user = "root";
 $pass = "${{MySQL.MYSQL_ROOT_PASSWORD}}";
 $dbname = "${{MySQL.MYSQL_DATABASE}}";
