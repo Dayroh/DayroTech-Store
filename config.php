@@ -1,12 +1,14 @@
 <?php
-$host = "localhost";
+$host = "${{MySQL.MYSQLHOST}}";        
+$port = "${{MySQL.MYSQLPORT}}";                
 $user = "root";
-$pass = ""; // default for XAMPP/WAMP
-$dbname = "dayrohtech_store";
+$pass = "${{MySQL.MYSQL_ROOT_PASSWORD}}";
+$dbname = "${{MySQL.MYSQL_DATABASE}}";
 
-$conn = new mysqli($host, $user, $pass, $dbname);
+$conn = new mysqli("$host:$port", $user, $pass, $dbname);
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 ?>
+
