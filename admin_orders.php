@@ -35,6 +35,10 @@ $result = $conn->query($sql);
 <div class="container my-5">
   <h3>📦 Customer Orders</h3>
 
+  <?php if (isset($_GET['deleted'])): ?>
+    <div class="alert alert-success">✅ Order deleted successfully.</div>
+  <?php endif; ?>
+
   <?php if ($result->num_rows > 0): ?>
   <table class="table table-bordered mt-4">
     <thead class="table-dark">
@@ -46,6 +50,7 @@ $result = $conn->query($sql);
         <th>Qty</th>
         <th>Total (Ksh)</th>
         <th>Date</th>
+        <th>Action</th>
       </tr>
     </thead>
     <tbody>
@@ -59,6 +64,13 @@ $result = $conn->query($sql);
         <td><?= $row['quantity'] ?? 'N/A' ?></td>
         <td>Ksh <?= number_format($row['total_price']) ?></td>
         <td><?= $row['order_date'] ?></td>
+        <td>
+          <a href="delete.php?type=order&id=<?= $row['order_id'] ?>" 
+             class="btn btn-sm btn-danger"
+             onclick="return confirm('Delete this order?')">
+            Delete
+          </a>
+        </td>
       </tr>
       <?php endwhile; ?>
     </tbody>
