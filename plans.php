@@ -14,6 +14,20 @@
   <source src="assets/videos/index.mp4" type="video/mp4" />
   Your browser does not support HTML5 video.
 </video>
+  <div class="container mt-5">
+  <div class="alert alert-info text-center shadow">
+    <h1 class="text-success mb-3">🚀 Get Connected with DayrohTech Internet!</h1>
+    <p class="lead mb-1">
+      Enjoy <strong>free installation</strong> when you join us with a one-time setup fee of <strong>Ksh 4,500</strong> —
+      covering a router, quality cabling, and your first 5 Mbps monthly plan!
+    </p>
+    <p class="mb-0 text-primary">
+      No hassle. No hidden fees. Just blazing internet delivered and installed by our team. 
+      Get started today and stay connected effortlessly!
+    </p>
+  </div>
+</div>
+
 <div class="container my-5">
   <h2 class="text-center">🌐 Our Internet Plans</h2>
   <p class="text-center text-muted mb-4">Choose a plan that fits your home or business.</p>
