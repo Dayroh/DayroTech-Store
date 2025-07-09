@@ -7,8 +7,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $phone   = mysqli_real_escape_string($conn, $_POST['phone']);
     $package = mysqli_real_escape_string($conn, $_POST['package']);
 
- $sql = "INSERT INTO plan_requests (name, email, phone, package, request_date)
+$sql = "INSERT INTO plan_requests (name, email, phone, package, request_date)
         VALUES ('$name', '$email', '$phone', '$package', NOW())";
+
 
 
 
