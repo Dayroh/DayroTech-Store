@@ -17,21 +17,21 @@ if (isset($_GET['type']) && isset($_GET['id'])) {
             $stmt = $conn->prepare("DELETE FROM users WHERE id = ?");
             $stmt->bind_param("i", $id);
             $stmt->execute();
-            header("Location: adminusers.php?deleted=1");
+            header("Location: admin_users.php?deleted=1");
             exit();
 
         case 'message':
             $stmt = $conn->prepare("DELETE FROM messages WHERE id = ?");
             $stmt->bind_param("i", $id);
             $stmt->execute();
-            header("Location: adminmessages.php?deleted=1");
+            header("Location: admin_messages.php?deleted=1");
             exit();
 
         case 'plan':
             $stmt = $conn->prepare("DELETE FROM plan_requests WHERE id = ?");
             $stmt->bind_param("i", $id);
             $stmt->execute();
-            header("Location: adminmessages.php?deleted=1#plans");
+            header("Location: request_plan.php?deleted=1#plans");
             exit();
 
         case 'order':
@@ -41,7 +41,7 @@ if (isset($_GET['type']) && isset($_GET['id'])) {
             $stmt = $conn->prepare("DELETE FROM orders WHERE id = ?");
             $stmt->bind_param("i", $id);
             $stmt->execute();
-            header("Location: adminorders.php?deleted=1");
+            header("Location: admin_orders.php?deleted=1");
             exit();
 
         default:
