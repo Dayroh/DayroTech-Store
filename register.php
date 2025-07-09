@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
   $stmt = $conn->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
-  $stmt->bind_param("sss", $name, $email, $password);
+ $stmt->bind_param("sss", $name, $email, $password);
   if ($stmt->execute()) {
     $_SESSION['user_id'] = $stmt->insert_id;
     $_SESSION['user_name'] = $name;
