@@ -13,13 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
    $stmt->bind_param("s", $email);
     $stmt->execute();
     $res = $stmt->get_result();
-echo "<pre>";
-echo "Rows: " . $res->num_rows . "\n";
-while ($row = $res->fetch_assoc()) {
-    print_r($row);
-}
-echo "</pre>";
-exit();
+
 
     if ($res->num_rows === 1) {
         $user = $res->fetch_assoc();
