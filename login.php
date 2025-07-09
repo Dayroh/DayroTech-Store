@@ -5,28 +5,29 @@ include 'config.php';
 $error = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $email = strtolower(trim($_POST['email'])); // Normalize email to lowercase
-
+    // Normalize inputs
+    $email = strtolower(trim($_POST['email']));
     $password = trim($_POST['password']);
 
-   $stmt = $conn->prepare("SELECT * FROM users WHERE LOWER(email) = ?");
-   $stmt->bind_param("s", $email);
+    // Prepare and execute query
+    $stmt = $conn->prepare("SELECT * FROM users WHERE LOWER(email) = ?");
+    $stmt->bind_param("s", $email);
     $stmt->execute();
     $res = $stmt->get_result();
 
-
+    // Check if user exists
     if ($res->num_rows === 1) {
         $user = $res->fetch_assoc();
 
-        // If you store plain passwords
+        // For now, compare plain text password
         if ($password === $user['password']) {
 
-            // Save session data
+            // Store session values
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['user_name'] = $user['name'];
             $_SESSION['user_role'] = $user['role'];
 
-            // Redirect based on role
+            // Redirect by role
             if ($user['role'] === 'admin') {
                 header("Location: admin_dashboard.php");
             } else {
@@ -42,7 +43,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -59,7 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <div class="alert alert-danger"><?= $error ?></div>
   <?php endif; ?>
 
-  <form method="POST">
+  <form method="POST" autocomplete="off">
     <div class="mb-3">
       <label>Email:</label>
       <input type="email" name="email" class="form-control" required />
