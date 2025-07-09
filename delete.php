@@ -31,7 +31,7 @@ if (isset($_GET['type']) && isset($_GET['id'])) {
             $stmt = $conn->prepare("DELETE FROM plan_requests WHERE id = ?");
             $stmt->bind_param("i", $id);
             $stmt->execute();
-            header("Location: request_plan.php?deleted=1#plans");
+            header("Location: plans.php?deleted=1#plans");
             exit();
 
         case 'order':
