@@ -1,10 +1,7 @@
 <?php
 session_start(); // Make sure session is started
 include 'config.php'; // DB connection
-require 'includes/phpmailer/PHPMailer.php';
-require 'includes/phpmailer/SMTP.php';
-require 'includes/phpmailer/Exception.php';
-
+require 'vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
