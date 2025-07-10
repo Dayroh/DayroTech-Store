@@ -67,16 +67,17 @@
       if ($result->num_rows > 0):
         while ($row = $result->fetch_assoc()):
           // Get related images for this product
-          $related_images_sql = "SELECT image_url FROM related_images WHERE product_id = ?";
-          $stmt = $conn->prepare($related_images_sql);
-          $stmt->bind_param("i", $row['id']);
-          $stmt->execute();
-          $related_images_result = $stmt->get_result();
-          $related_images = [];
-          while ($img_row = $related_images_result->fetch_assoc()) {
-            $related_images[] = $img_row['image_url'];
-          }
-          $stmt->close();
+        $related_images_sql = "SELECT image_url FROM related_images WHERE product_id = ?";
+$stmt = $conn->prepare($related_images_sql);
+$stmt->bind_param("i", $row['id']);
+$stmt->execute();
+$related_images_result = $stmt->get_result();
+$related_images = [];
+while ($img_row = $related_images_result->fetch_assoc()) {
+  $related_images[] = $img_row['image_url'];
+}
+$stmt->close();
+
           
           $priceValue = $row['price'];
           $priceRange = $priceValue < 20000 ? "under20" : ($priceValue <= 50000 ? "20to50" : "over50");
