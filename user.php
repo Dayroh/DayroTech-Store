@@ -6,6 +6,21 @@ $greeting = ($hour < 12) ? "Good morning" : (($hour < 18) ? "Good afternoon" : "
 if (isset($_SESSION['user_name'])) {
   echo "<p class='text-end me-3'>$greeting, <strong>" . htmlspecialchars($_SESSION['user_name']) . "</strong> 👋</p>";
 }
+
+// Pagination logic
+$products_per_page = 4;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $products_per_page;
+
+// Get total number of products
+$total_products_sql = "SELECT COUNT(*) as total FROM products";
+$total_products_result = $conn->query($total_products_sql);
+$total_products = $total_products_result->fetch_assoc()['total'];
+$total_pages = ceil($total_products / $products_per_page);
+
+// Get products for current page
+$sql = "SELECT * FROM products LIMIT $products_per_page OFFSET $offset";
+$result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -94,9 +109,6 @@ if (isset($_SESSION['user_name'])) {
     <!-- Product Grid -->
     <div class="row" id="productGrid">
       <?php
-      $sql = "SELECT * FROM products";
-      $result = $conn->query($sql);
-
       if ($result->num_rows > 0):
         while ($row = $result->fetch_assoc()):
           $priceValue = $row['price'];
@@ -113,14 +125,11 @@ if (isset($_SESSION['user_name'])) {
             <p class="card-text"><?= htmlspecialchars($row['description']) ?></p>
             <p class="text-success">Ksh <?= number_format($row['price']) ?></p>
             <form action="cart.php" method="POST">
-  <input type="hidden" name="product_id" value="<?= $row['id'] ?>">
-  <input type="hidden" name="product_name" value="<?= htmlspecialchars($row['name']) ?>">
-  <input type="hidden" name="price" value="<?= $row['price'] ?>">
-  <button type="submit" name="add_to_cart" class="btn btn-outline-primary btn-sm">Add to Cart</button>
-  <li class="nav-item"><a class="nav-link" href="view_cart.php">View Cart</a></li>
-
-</form>
-
+              <input type="hidden" name="product_id" value="<?= $row['id'] ?>">
+              <input type="hidden" name="product_name" value="<?= htmlspecialchars($row['name']) ?>">
+              <input type="hidden" name="price" value="<?= $row['price'] ?>">
+              <button type="submit" name="add_to_cart" class="btn btn-outline-primary btn-sm">Add to Cart</button>
+            </form>
           </div>
         </div>
       </div>
@@ -129,8 +138,26 @@ if (isset($_SESSION['user_name'])) {
       else:
         echo "<p class='text-center'>No products available at the moment.</p>";
       endif;
-      $conn->close();
       ?>
+    </div>
+
+    <!-- Pagination and View More -->
+    <div class="row mt-4">
+      <div class="col-12 d-flex justify-content-between">
+        <?php if ($page > 1): ?>
+          <a href="?page=<?= $page - 1 ?>" class="btn btn-outline-primary">Previous</a>
+        <?php else: ?>
+          <span class="btn btn-outline-secondary disabled">Previous</span>
+        <?php endif; ?>
+        
+        <?php if ($page < $total_pages): ?>
+          <a href="?page=<?= $page + 1 ?>" class="btn btn-outline-primary">Next</a>
+          <a href="view_more.php" class="btn btn-primary">View All Products</a>
+        <?php else: ?>
+          <span class="btn btn-outline-secondary disabled">Next</span>
+          <a href="all_products.php" class="btn btn-primary">View All Products</a>
+        <?php endif; ?>
+      </div>
     </div>
   </section>
 
