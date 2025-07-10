@@ -16,13 +16,13 @@
       --dark: #2d3436;
       --light: #f5f6fa;
     }
-    
+
     body {
       font-family: 'Poppins', sans-serif;
       background-color: #f8f9fa;
       color: var(--dark);
     }
-    
+
     .category-filter {
       background: white;
       padding: 1.5rem;
@@ -30,7 +30,7 @@
       box-shadow: 0 5px 15px rgba(0,0,0,0.05);
       margin-bottom: 2rem;
     }
-    
+
     .category-btn {
       border: 2px solid var(--primary);
       color: var(--primary);
@@ -38,28 +38,28 @@
       margin: 0.25rem;
       transition: all 0.3s ease;
     }
-    
+
     .category-btn:hover, .category-btn.active {
       background: var(--primary);
       color: white;
     }
-    
+
     .product-card {
       transition: transform 0.3s ease, box-shadow 0.3s ease;
       margin-bottom: 2rem;
     }
-    
+
     .product-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     }
-    
+
     .card {
       border: none;
       border-radius: 0.75rem;
       overflow: hidden;
     }
-    
+
     .carousel-control-prev, .carousel-control-next {
       background: rgba(0,0,0,0.2);
       width: 40px;
@@ -68,20 +68,20 @@
       top: 50%;
       transform: translateY(-50%);
     }
-    
+
     .carousel-indicators button {
       width: 8px;
       height: 8px;
       border-radius: 50%;
       margin: 0 3px;
     }
-    
+
     .related-thumbs {
       display: flex;
       gap: 8px;
       margin-top: 10px;
     }
-    
+
     .related-thumbs img {
       width: 50px;
       height: 50px;
@@ -91,30 +91,30 @@
       cursor: pointer;
       transition: all 0.2s ease;
     }
-    
+
     .related-thumbs img:hover {
       border-color: var(--primary);
       transform: scale(1.05);
     }
-    
+
     .price-tag {
       font-size: 1.25rem;
       font-weight: 700;
       color: var(--primary);
     }
-    
+
     .btn-add-to-cart {
       background: var(--primary);
       color: white;
       border: none;
       transition: all 0.3s ease;
     }
-    
+
     .btn-add-to-cart:hover {
       background: var(--primary-dark);
       transform: translateY(-2px);
     }
-    
+
     .badge-category {
       position: absolute;
       top: 10px;
@@ -154,7 +154,7 @@
   <!-- Main Content -->
   <div class="container py-5">
     <h1 class="text-center mb-5">All Products</h1>
-    
+
     <!-- Category Filter -->
     <div class="category-filter">
       <h4 class="mb-3">Filter by Category:</h4>
@@ -164,7 +164,7 @@
         // Get distinct categories
         $categories_sql = "SELECT DISTINCT category FROM products WHERE category IS NOT NULL";
         $categories_result = $conn->query($categories_sql);
-        
+
         if ($categories_result->num_rows > 0) {
           while ($category_row = $categories_result->fetch_assoc()) {
             echo '<button class="btn category-btn" data-category="'.htmlspecialchars(strtolower($category_row['category'])).'">'.
@@ -174,65 +174,29 @@
         ?>
       </div>
     </div>
-    
+
     <!-- Product Grid -->
     <div class="row" id="productGrid">
       <?php
-      // Get all products with their related images
-     $sql = "SELECT * FROM products";
-
+      // Updated: Simple query without related_images
+      $sql = "SELECT * FROM products";
       $result = $conn->query($sql);
 
       if ($result->num_rows > 0):
         while ($row = $result->fetch_assoc()):
-          $related_images = $row['related_images'] ? explode(',', $row['related_images']) : [];
       ?>
       <div class="col-lg-3 col-md-4 col-sm-6 product-item" 
            data-category="<?= strtolower($row['category']) ?>">
         <div class="card product-card h-100">
-          <!-- Product Image Carousel -->
-          <div id="productCarousel<?= $row['id'] ?>" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner">
-              <div class="carousel-item active">
-                <img src="<?= $row['image'] ?>" class="d-block w-100" alt="<?= htmlspecialchars($row['name']) ?>" style="height: 200px; object-fit: contain;">
-              </div>
-              <?php foreach ($related_images as $index => $image): ?>
-              <div class="carousel-item">
-                <img src="<?= $image ?>" class="d-block w-100" alt="Related image <?= $index + 1 ?>" style="height: 200px; object-fit: contain;">
-              </div>
-              <?php endforeach; ?>
-            </div>
-            <?php if (count($related_images) > 0): ?>
-            <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel<?= $row['id'] ?>" data-bs-slide="prev">
-              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-              <span class="visually-hidden">Previous</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#productCarousel<?= $row['id'] ?>" data-bs-slide="next">
-              <span class="carousel-control-next-icon" aria-hidden="true"></span>
-              <span class="visually-hidden">Next</span>
-            </button>
-            <?php endif; ?>
-          </div>
-          
+          <img src="<?= $row['image'] ?>" class="card-img-top" alt="<?= htmlspecialchars($row['name']) ?>" style="height: 200px; object-fit: contain;">
+
           <span class="badge badge-category"><?= htmlspecialchars($row['category']) ?></span>
-          
+
           <div class="card-body">
             <h5 class="card-title"><?= htmlspecialchars($row['name']) ?></h5>
             <p class="card-text"><?= htmlspecialchars($row['description']) ?></p>
             <p class="price-tag">Ksh <?= number_format($row['price']) ?></p>
-            
-            <!-- Related Images Thumbnails -->
-            <?php if (count($related_images) > 0): ?>
-            <div class="related-thumbs">
-              <img src="<?= $row['image'] ?>" 
-                   onclick="document.querySelector('#productCarousel<?= $row['id'] ?>').carousel.to(0)">
-              <?php foreach ($related_images as $index => $image): ?>
-              <img src="<?= $image ?>" 
-                   onclick="document.querySelector('#productCarousel<?= $row['id'] ?>').carousel.to(<?= $index + 1 ?>)">
-              <?php endforeach; ?>
-            </div>
-            <?php endif; ?>
-            
+
             <form action="cart.php" method="POST" class="mt-3">
               <input type="hidden" name="product_id" value="<?= $row['id'] ?>">
               <input type="hidden" name="product_name" value="<?= htmlspecialchars($row['name']) ?>">
@@ -269,10 +233,10 @@
         // Update active button
         document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
         this.classList.add('active');
-        
+
         const category = this.dataset.category;
         const productItems = document.querySelectorAll('.product-item');
-        
+
         productItems.forEach(item => {
           if (category === 'all' || item.dataset.category === category) {
             item.style.display = 'block';
