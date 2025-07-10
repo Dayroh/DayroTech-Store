@@ -60,7 +60,8 @@
     <div class="row" id="productGrid">
       <?php
       // Get 4 featured products
-      $sql = "SELECT * FROM products WHERE is_featured = TRUE LIMIT 4";
+     $sql = "SELECT * FROM products LIMIT 4";
+
       $result = $conn->query($sql);
 
       if ($result->num_rows > 0):
