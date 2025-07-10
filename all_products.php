@@ -179,9 +179,8 @@
     <div class="row" id="productGrid">
       <?php
       // Get all products with their related images
-      $sql = "SELECT p.*, 
-              (SELECT GROUP_CONCAT(ri.image_url) FROM related_images ri WHERE ri.product_id = p.id) AS related_images
-              FROM products p";
+     $sql = "SELECT * FROM products";
+
       $result = $conn->query($sql);
 
       if ($result->num_rows > 0):
