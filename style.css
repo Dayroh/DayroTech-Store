@@ -40,7 +40,8 @@ body {
 
 /* ==== Modern Navbar ==== */
 .navbar {
-  background: rgba(255, 255, 255, 0.9) !important;
+  background: linear-gradient(135deg, rgba(108, 92, 231, 0.8) 0%, rgba(0, 206, 201, 0.8) 100%);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   border-bottom: 1px solid rgba(255, 255, 255, 0.3);
@@ -50,7 +51,7 @@ body {
   left: 0;
   right: 0;
   width: 100%;
-  z-index: 1030;
+  z-index: 1000;
   
 }
 

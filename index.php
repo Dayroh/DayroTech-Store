@@ -5,10 +5,22 @@
   <meta charset="UTF-8" />
   <title>DayrohTech Store</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <!-- Favicon (Browser Tab Icon) -->
+  <link rel="icon" href="assets/images/logo.png" type="image/png">
+  <!-- For Apple Devices -->
+  <link rel="apple-touch-icon" href="assets/images/loader-icon.png">
+  <!-- For IE and older browsers -->
+  <link rel="shortcut icon" href="assets/images/loader-icon.ico" type="image/x-icon">
+  <!-- Preload the loader image -->
+  <!--<link rel="preload" href="assets/images/loader-icon.png" as="image">-->
+  <!-- CSS Files -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="whatsapp.css">
+  
+  <!-- JavaScript -->
   <script src="whatsapp.js" defer></script>
 </head>
 <body>
