@@ -121,6 +121,7 @@ if (isset($_GET['print'])) {
     <html lang="en">
     <head>
         <title>Sales Report | DayrohTech</title>
+        <link rel="icon" href="assets/images/logo.png" type="image/png">
         <style>
             body { font-family: Arial, sans-serif; }
             .print-header { text-align: center; margin-bottom: 20px; }
