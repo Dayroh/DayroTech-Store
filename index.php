@@ -83,10 +83,17 @@
           $stmt->bind_param("i", $row['id']);
           $stmt->execute();
           $related_images_result = $stmt->get_result();
-          $related_images = [];
-          while ($img_row = $related_images_result->fetch_assoc()) {
-            $related_images[] = $img_row['image_url'];
-          }
+$related_images = [];
+while ($img_row = $related_images_result->fetch_assoc()) {
+    $related_images[] = $img_row['image_url'];
+}
+
+// ✅ Remove duplicates and main image if it's in related_images
+$related_images = array_filter($related_images, function($url) use ($row) {
+    return $url !== $row['image'];
+});
+$related_images = array_unique($related_images);
+
           $stmt->close();
           
           $priceValue = $row['price'];
