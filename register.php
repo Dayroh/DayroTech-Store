@@ -24,7 +24,7 @@ function sendemail_verify($name, $email, $verify_token)
         $mail->SMTPSecure = 'tls';
         $mail->Port       = 587;
 
-        $mail->setFrom('dayrohtech@gmail.com', 'DayrohTech');
+        $mail->setFrom('kendayroh1@gmail.com', 'DayrohTech');
         $mail->addAddress($email);
 
         $mail->isHTML(true);
