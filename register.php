@@ -1,24 +1,66 @@
 <?php
 include 'config.php';
 session_start();
+require 'vendor/autoload.php'; // PHPMailer
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+$error = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name']);
-    $email = trim($_POST['email']);
-    $password = $_POST['password'];  // store plain password
+    $email = strtolower(trim($_POST['email']));
+    $password = $_POST['password']; // plain password
 
-    $stmt = $conn->prepare("INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
-    $stmt->bind_param("sss", $name, $email, $password);
+    // Generate token
+    $token = bin2hex(random_bytes(16));
+
+    // Insert user with unverified status
+    $stmt = $conn->prepare("INSERT INTO users (name, email, password, verify_token, is_verified) VALUES (?, ?, ?, ?, 0)");
+    $stmt->bind_param("ssss", $name, $email, $password, $token);
+
     if ($stmt->execute()) {
-        $_SESSION['user_id'] = $stmt->insert_id;
-        $_SESSION['user_name'] = $name;
-        header("Location: login.php");
-        exit();
+        // Send verification email
+        $verify_link = "http://yourdomain.com/verify.php?email=" . urlencode($email) . "&token=$token";
+
+        $mail = new PHPMailer(true);
+        try {
+            // Server settings
+            $mail->isSMTP();
+            $mail->Host = 'smtp.example.com'; // replace with your SMTP server
+            $mail->SMTPAuth = true;
+            $mail->Username = 'your_email@example.com'; // SMTP username
+            $mail->Password = 'your_password';           // SMTP password
+            $mail->SMTPSecure = 'tls';
+            $mail->Port = 587;
+
+            // Recipients
+            $mail->setFrom('no-reply@yourdomain.com', 'DayrohTech');
+            $mail->addAddress($email, $name);
+
+            // Content
+            $mail->isHTML(true);
+            $mail->Subject = 'Verify Your Email - DayrohTech';
+            $mail->Body    = "
+                <h2>Welcome to DayrohTech, $name!</h2>
+                <p>Please verify your email by clicking the link below:</p>
+                <a href='$verify_link'>Verify Email</a>
+            ";
+
+            $mail->send();
+
+            header("Location: verify-notice.php");
+            exit();
+        } catch (Exception $e) {
+            $error = "Verification email could not be sent. Mailer Error: " . $mail->ErrorInfo;
+        }
     } else {
-        $error = "Email already exists.";
+        $error = "An account with this email already exists.";
     }
 }
 ?>
+<!-- Your HTML code remains unchanged below -->
 
 <!DOCTYPE html>
 <html lang="en">
