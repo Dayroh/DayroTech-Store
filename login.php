@@ -2,9 +2,9 @@
 session_start();
 require_once "config.php";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+/*if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST['email']);
-    $password = $_POST['password'];
+    $password = $_POST['password'];*/
 
     $query = "SELECT * FROM users WHERE email = ?";
     $stmt = $conn->prepare($query);
