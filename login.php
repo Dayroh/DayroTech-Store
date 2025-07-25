@@ -278,13 +278,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <h1>Welcome Back</h1>
       <p>Sign in to access your DayrohTech account</p>
     </div>
- <?php
-session_start();
+<?php
 if (isset($_SESSION['status'])) {
     echo "<p style='color:red;'>" . $_SESSION['status'] . "</p>";
     unset($_SESSION['status']);
 }
 ?>
+
 
 
     <div class="login-form">
