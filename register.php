@@ -1,64 +1,75 @@
 <?php
-include 'config.php';
 session_start();
-require 'vendor/autoload.php'; // PHPMailer
+require_once 'config.php'; // include your DB connection here
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-$error = "";
+require 'vendor/autoload.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = trim($_POST['name']);
-    $email = strtolower(trim($_POST['email']));
-    $password = $_POST['password']; // plain password
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $name = $_POST["name"];
+    $email = $_POST["email"];
+    $password = password_hash($_POST["password"], PASSWORD_DEFAULT);
+    $token = bin2hex(random_bytes(32));
+    
+    // Check if email already exists
+    $check = $conn->prepare("SELECT * FROM users WHERE email = ?");
+    $check->bind_param("s", $email);
+    $check->execute();
+    $result = $check->get_result();
+    
+    if ($result->num_rows > 0) {
+        $_SESSION['error'] = "Email already registered.";
+        header("Location: register.html");
+        exit();
+    }
 
-    // Generate token
-    $token = bin2hex(random_bytes(16));
-
-    // Insert user with unverified status
-    $stmt = $conn->prepare("INSERT INTO users (name, email, password, verify_token, is_verified) VALUES (?, ?, ?, ?, 0)");
+    // Insert user
+    $stmt = $conn->prepare("INSERT INTO users (name, email, password, token, is_verified) VALUES (?, ?, ?, ?, 0)");
     $stmt->bind_param("ssss", $name, $email, $password, $token);
-
+    
     if ($stmt->execute()) {
-        // Send verification email
-        $verify_link = "http://yourdomain.com/verify.php?email=" . urlencode($email) . "&token=$token";
-
+        // SEND VERIFICATION EMAIL
+        $verifyLink = "http://localhost/verify.php?email=$email&token=$token"; // Replace with your actual domain
+        
         $mail = new PHPMailer(true);
         try {
             // Server settings
-           $mail->Host = 'smtp.gmail.com';
-$mail->Username = 'kendayroh1@@gmail.com';
-$mail->Password = 'gqop mpgc gtwl mhcl'; // Use an App Password, not your login password
-$mail->SMTPSecure = 'tls';
-$mail->Port = 587;
-
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com'; // or your mail server
+            $mail->SMTPAuth = true;
+            $mail->Username = 'kendayroh1@gmail.com'; // your Gmail
+            $mail->Password = 'gqop mpgc gtwl mhcl'; // your Gmail App Password
+            $mail->SMTPSecure = 'tls';
+            $mail->Port = 587;
 
             // Recipients
-            $mail->setFrom('no-reply@yourdomain.com', 'DayrohTech');
+            $mail->setFrom('your_email@gmail.com', 'DayrohTech');
             $mail->addAddress($email, $name);
 
             // Content
             $mail->isHTML(true);
-            $mail->Subject = 'Verify Your Email - DayrohTech';
-            $mail->Body    = "
-                <h2>Welcome to DayrohTech, $name!</h2>
-                <p>Please verify your email by clicking the link below:</p>
-                <a href='$verify_link'>Verify Email</a>
-            ";
+            $mail->Subject = 'Verify your email';
+            $mail->Body = "Hi $name,<br><br>Please click the link below to verify your email:<br><a href='$verifyLink'>$verifyLink</a><br><br>Thanks,<br>DayrohTech";
 
             $mail->send();
-
-            header("Location: verify-notice.php");
+            $_SESSION['success'] = "Registration successful. Please check your email to verify your account.";
+            header("Location: login.html");
             exit();
         } catch (Exception $e) {
-            $error = "Verification email could not be sent. Mailer Error: " . $mail->ErrorInfo;
+            $_SESSION['error'] = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+            header("Location: register.html");
+            exit();
         }
     } else {
-        $error = "An account with this email already exists.";
+        $_SESSION['error'] = "Registration failed.";
+        header("Location: register.html");
+        exit();
     }
 }
 ?>
+
 <!-- Your HTML code remains unchanged below -->
 
 <!DOCTYPE html>
