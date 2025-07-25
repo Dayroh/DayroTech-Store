@@ -2,49 +2,41 @@
 session_start();
 include 'config.php';
 
-$error = "";
+$error = '';
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    // Normalize inputs
+if (isset($_POST['login_btn'])) {
     $email = strtolower(trim($_POST['email']));
-    $password = trim($_POST['password']);
+    $password = $_POST['password'];
 
-    // Prepare and execute query
-    $stmt = $conn->prepare("SELECT * FROM users WHERE LOWER(email) = ?");
+    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? LIMIT 1");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $res = $stmt->get_result();
 
-    // Check if user exists
-    if ($res->num_rows === 1) {
+    if ($res->num_rows > 0) {
         $user = $res->fetch_assoc();
 
-        // Compare plain text password (change to password_verify in future)
-        if ($password === $user['password']) {
-            if ($user['is_verified'] == 0) {
-                $error = "Please verify your email address before logging in.";
-            } else {
-                // Store session values
+        if (password_verify($password, $user['password'])) {
+            if ($user['email_verified'] == 1) {
                 $_SESSION['user_id'] = $user['id'];
-                $_SESSION['user_name'] = $user['name'];
-                $_SESSION['user_role'] = $user['role'];
-
-                // Redirect by role
-                if ($user['role'] === 'admin') {
-                    header("Location: admin_dashboard.php");
-                } else {
-                    header("Location: user.php");
-                }
+                $_SESSION['user_email'] = $user['email'];
+                header("Location: dashboard.php");
                 exit();
+            } else {
+                $error = "Please verify your email before logging in.";
             }
         } else {
-            $error = "Incorrect password";
+            $error = "Invalid credentials.";
         }
     } else {
-        $error = "No account found with that email";
+        $error = "Account not found.";
     }
 }
 ?>
+
+<!-- Display errors -->
+<?php if (!empty($error)) { echo "<p style='color:red;'>$error</p>"; } ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
