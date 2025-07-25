@@ -27,13 +27,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $mail = new PHPMailer(true);
         try {
             // Server settings
-            $mail->isSMTP();
-            $mail->Host = 'smtp.example.com'; // replace with your SMTP server
-            $mail->SMTPAuth = true;
-            $mail->Username = 'your_email@example.com'; // SMTP username
-            $mail->Password = 'your_password';           // SMTP password
-            $mail->SMTPSecure = 'tls';
-            $mail->Port = 587;
+           $mail->Host = 'smtp.gmail.com';
+$mail->Username = 'kendayroh1@@gmail.com';
+$mail->Password = 'gqop mpgc gtwl mhcl'; // Use an App Password, not your login password
+$mail->SMTPSecure = 'tls';
+$mail->Port = 587;
+
 
             // Recipients
             $mail->setFrom('no-reply@yourdomain.com', 'DayrohTech');
