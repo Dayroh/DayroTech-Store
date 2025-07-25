@@ -1,42 +1,27 @@
 <?php
-session_start();
-require_once "config.php";
+require 'config.php'; // Your DB connection
 
 if (isset($_GET['token'])) {
     $token = $_GET['token'];
 
-    $query = "SELECT * FROM users WHERE token = ?";
-    $stmt = $conn->prepare($query);
+    $stmt = $conn->prepare("SELECT * FROM users WHERE verify_token = ? LIMIT 1");
     $stmt->bind_param("s", $token);
     $stmt->execute();
     $result = $stmt->get_result();
 
-    if ($result->num_rows === 1) {
+    if ($result->num_rows > 0) {
         $user = $result->fetch_assoc();
 
-        if ($user['email_verified'] == 1) {
-            $_SESSION['status'] = "Your email is already verified.";
-            header("Location: login.php");
-            exit();
-        }
+        // Mark the user as verified
+        $stmt = $conn->prepare("UPDATE users SET is_verified = 1, verify_token = NULL WHERE id = ?");
+        $stmt->bind_param("i", $user['id']);
+        $stmt->execute();
 
-        // Update: mark as verified
-        $update_query = "UPDATE users SET email_verified = 1, token = NULL WHERE id = ?";
-        $update_stmt = $conn->prepare($update_query);
-        $update_stmt->bind_param("i", $user['id']);
-        $update_stmt->execute();
-
-        $_SESSION['status'] = "Email verified successfully. You can now log in.";
-        header("Location: login.php");
-        exit();
+        echo "Email verified successfully. You can now <a href='login.php'>login</a>.";
     } else {
-        $_SESSION['status'] = "Invalid or expired verification link.";
-        header("Location: login.php");
-        exit();
+        echo "Invalid or expired verification link.";
     }
 } else {
-    $_SESSION['status'] = "No verification token provided.";
-    header("Location: login.php");
-    exit();
+    echo "No verification token provided.";
 }
 ?>
