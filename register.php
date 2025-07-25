@@ -290,6 +290,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <i class="fas fa-exclamation-circle me-2"></i><?php echo $error; ?>
                             </div>
                         <?php endif; ?>
+<?php
+if (isset($_SESSION['status'])) {
+    echo '<div class="alert alert-success">'.$_SESSION['status'].'</div>';
+    unset($_SESSION['status']);
+}
+?>
 
                         <form method="POST">
                             <div class="input-group">
@@ -307,7 +313,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <input type="password" name="password" id="password" placeholder="Password" class="form-control input-with-icon" required>
                                 <i class="fas fa-eye password-toggle" id="togglePassword"></i>
                             </div>
-
+<div class="input-group">
+    <i class="fas fa-lock input-icon"></i>
+    <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirm Password" class="form-control input-with-icon" required>
+</div>
                             <button type="submit" class="btn btn-register">
                                 <i class="fas fa-user-plus me-2"></i>Register
                             </button>
