@@ -39,17 +39,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bind_param("ssss", $name, $email, $hashed_password, $token);
 
     if ($stmt->execute()) {
-        // Send verification email
-        $verify_link = "http://yourdomain.com/verify.php?token=" . $token;
+       use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
-        // Replace with PHPMailer or mail() if needed
-        $subject = "Verify Your Email";
-        $message = "Click the link to verify your email: <a href='$verify_link'>Verify Now</a>";
-        $headers = "MIME-Version: 1.0" . "\r\n";
-        $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-        $headers .= "From: no-reply@yourdomain.com";
+require 'vendor/autoload.php';
 
-        mail($email, $subject, $message, $headers);
+$mail = new PHPMailer(true);
+
+try {
+    $mail->isSMTP();
+    $mail->Host = 'smtp.gmail.com';               // Change this to your SMTP server
+    $mail->SMTPAuth = true;
+    $mail->Username = 'kendayroh1@gmail.com';     // Your Gmail address
+    $mail->Password = 'chej piuz elqp lxxu';        // Your Gmail app password
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->SMTPSecure = 'tls';
+    $mail->Port = 587;
+
+    $mail->setFrom('your-email@gmail.com', 'DayrohTech Store');
+    $mail->addAddress($email, $name);
+
+    $verify_link = "http://yourdomain.com/verify.php?token=" . $token;
+
+    $mail->isHTML(true);
+    $mail->Subject = 'Verify Your Email Address';
+    $mail->Body    = "
+        <h2>Thanks for registering at DayrohTech</h2>
+        <p>Click the link below to verify your email:</p>
+        <a href='$verify_link'>Verify Now</a>
+    ";
+
+    $mail->send();
+    $_SESSION['status'] = "Registration successful. Check your email to verify.";
+    header("Location: login.php");
+    exit();
+} catch (Exception $e) {
+    $_SESSION['status'] = "Email could not be sent. Mailer Error: {$mail->ErrorInfo}";
+    header("Location: register.php");
+    exit();
+}
+
 
         $_SESSION['status'] = "Registration successful. Check your email to verify.";
         header("Location: login.php");
