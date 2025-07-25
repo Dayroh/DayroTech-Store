@@ -326,6 +326,11 @@ if (isset($_SESSION['status'])) {
           <span>Login</span>
           <span>→</span>
         </button>
+     <p style="margin-top:10px;">
+    Didn't get the verification email?
+    <a href="resend-verification.php" style="color:blue;">Resend it here</a>
+</p>
+
       </form>
       
       <div class="login-footer">
