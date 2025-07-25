@@ -1,91 +1,43 @@
 <?php
 session_start();
-include('config.php');
+include 'config.php';
+include 'sendemail_verify.php';
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
-require 'vendor/autoload.php';
-
-function sendemail_verify($name, $email, $verify_token)
-{
-    $mail = new PHPMailer(true);
-    try {
-        // SMTP Debugging (shows email errors in browser)
-        $mail->SMTPDebug = 0;
-        $mail->Debugoutput = 'html';
-
-        // SMTP setup
-        $mail->isSMTP();
-        $mail->Host       = 'smtp.gmail.com';
-        $mail->SMTPAuth   = true;
-        $mail->Username   = 'kendayroh1@gmail.com'; // your Gmail
-        $mail->Password   = 'gqop mpgc gtwl mhcl';    // your 16-char Gmail app password
-        $mail->SMTPSecure = 'tls';
-        $mail->Port       = 587;
-
-        $mail->setFrom('kendayroh1@gmail.com', 'DayrohTech');
-        $mail->addAddress($email);
-
-        $mail->isHTML(true);
-        $mail->Subject = 'Email Verification from DayrohTech';
-
-        $verify_url = "http://localhost/email-verification/verify-email.php?token=$verify_token&email=$email";
-
-        $mail->Body = "
-            <h2>Email Verification</h2>
-            <p>Hi <strong>$name</strong>,</p>
-            <p>Click the link below to verify your email address:</p>
-            <a href='$verify_url'>Verify Email</a><br><br>
-            <p>If you didn’t request this, just ignore this email.</p>
-        ";
-
-        $mail->send();
-    } catch (Exception $e) {
-        echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-    }
-}
-
-// Registration handling
 if (isset($_POST['register_btn'])) {
-    $name       = mysqli_real_escape_string($con, $_POST['name']);
-    $phone      = mysqli_real_escape_string($con, $_POST['phone']);
-    $email      = mysqli_real_escape_string($con, $_POST['email']);
-    $password   = mysqli_real_escape_string($con, $_POST['password']);
-    $cpassword  = mysqli_real_escape_string($con, $_POST['cpassword']);
+    $name = $_POST['name'];
+    $email = strtolower(trim($_POST['email']));
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $user_token = md5(rand());
 
-    if ($password === $cpassword) {
-        // Check if email already exists
-        $check_email_query = "SELECT email FROM users WHERE email='$email' LIMIT 1";
-        $check_email_run   = mysqli_query($con, $check_email_query);
+    // Check if email already exists
+    $check_email = "SELECT email FROM users WHERE email = ?";
+    $stmt = $conn->prepare($check_email);
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $stmt->store_result();
+    
+    if ($stmt->num_rows > 0) {
+        $_SESSION['status'] = "Email already registered!";
+        header("Location: register.php");
+        exit();
+    }
 
-        if (mysqli_num_rows($check_email_run) > 0) {
-            $_SESSION['status'] = "Email already exists.";
-            header("Location: register.php");
-        } else {
-            // Insert user
-            $user_token   = md5(rand());
-            $enc_password = password_hash($password, PASSWORD_BCRYPT);
+    // Register new user
+    $query = "INSERT INTO users (name, email, password, verify_token) VALUES (?, ?, ?, ?)";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("ssss", $name, $email, $password, $user_token);
 
-            $query = "INSERT INTO users (name, phone, email, password, verify_token) 
-                      VALUES ('$name', '$phone', '$email', '$enc_password', '$user_token')";
-            $query_run = mysqli_query($con, $query);
-
-            if ($query_run) {
-                sendemail_verify($name, $email, $user_token);
-                $_SESSION['status'] = "Registration successful! Check your email to verify.";
-                header("Location: register.php");
-            } else {
-                $_SESSION['status'] = "Registration failed. Try again.";
-                header("Location: register.php");
-            }
-        }
+    if ($stmt->execute()) {
+        sendemail_verify($name, $email, $user_token);
+        $_SESSION['status'] = "Registration successful! Please check your email to verify.";
+        header("Location: register.php");
     } else {
-        $_SESSION['status'] = "Passwords do not match.";
+        $_SESSION['status'] = "Something went wrong!";
         header("Location: register.php");
     }
 }
 ?>
+
 <!-- Your HTML code remains unchanged below -->
 
 <!DOCTYPE html>
