@@ -12,7 +12,7 @@ function sendemail_verify($name, $email, $verify_token)
     $mail = new PHPMailer(true);
     try {
         // SMTP Debugging (shows email errors in browser)
-        $mail->SMTPDebug = 2;
+        $mail->SMTPDebug = 0;
         $mail->Debugoutput = 'html';
 
         // SMTP setup
@@ -85,8 +85,7 @@ if (isset($_POST['register_btn'])) {
         header("Location: register.php");
     }
 }
-
-
+?>
 <!-- Your HTML code remains unchanged below -->
 
 <!DOCTYPE html>
