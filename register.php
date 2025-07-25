@@ -1,42 +1,67 @@
 <?php
 session_start();
-include 'config.php';
-include 'sendemail_verify.php';
+require_once "db.php";
 
-if (isset($_POST['register_btn'])) {
-    $name = $_POST['name'];
-    $email = strtolower(trim($_POST['email']));
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    $user_token = md5(rand());
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'];
 
-    // Check if email already exists
-    $check_email = "SELECT email FROM users WHERE email = ?";
-    $stmt = $conn->prepare($check_email);
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $stmt->store_result();
-    
-    if ($stmt->num_rows > 0) {
-        $_SESSION['status'] = "Email already registered!";
+    if ($password !== $confirm_password) {
+        $_SESSION['status'] = "Passwords do not match.";
         header("Location: register.php");
         exit();
     }
 
-    // Register new user
-    $query = "INSERT INTO users (name, email, password, verify_token) VALUES (?, ?, ?, ?)";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("ssss", $name, $email, $password, $user_token);
+    // Check if email already exists
+    $check_query = "SELECT id FROM users WHERE email = ?";
+    $stmt = $conn->prepare($check_query);
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $stmt->store_result();
+
+    if ($stmt->num_rows > 0) {
+        $_SESSION['status'] = "Email already registered.";
+        header("Location: register.php");
+        exit();
+    }
+
+    $stmt->close();
+
+    // Generate token
+    $token = bin2hex(random_bytes(50));
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+    // Insert new user
+    $insert_query = "INSERT INTO users (name, email, password, token, email_verified) VALUES (?, ?, ?, ?, 0)";
+    $stmt = $conn->prepare($insert_query);
+    $stmt->bind_param("ssss", $name, $email, $hashed_password, $token);
 
     if ($stmt->execute()) {
-        sendemail_verify($name, $email, $user_token);
-        $_SESSION['status'] = "Registration successful! Please check your email to verify.";
-        header("Location: register.php");
+        // Send verification email
+        $verify_link = "http://yourdomain.com/verify.php?token=" . $token;
+
+        // Replace with PHPMailer or mail() if needed
+        $subject = "Verify Your Email";
+        $message = "Click the link to verify your email: <a href='$verify_link'>Verify Now</a>";
+        $headers = "MIME-Version: 1.0" . "\r\n";
+        $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+        $headers .= "From: no-reply@yourdomain.com";
+
+        mail($email, $subject, $message, $headers);
+
+        $_SESSION['status'] = "Registration successful. Check your email to verify.";
+        header("Location: login.php");
+        exit();
     } else {
-        $_SESSION['status'] = "Something went wrong!";
+        $_SESSION['status'] = "Database error: " . $stmt->error;
         header("Location: register.php");
+        exit();
     }
 }
 ?>
+
 
 <!-- Your HTML code remains unchanged below -->
 
