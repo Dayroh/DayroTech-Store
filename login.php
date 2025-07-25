@@ -17,7 +17,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if (password_verify($password, $row['password'])) {
 
-            if ($row['email_verified'] != 1) {
+           if ($row['is_verified'] != 1) {
+
                 $_SESSION['status'] = "Please verify your email before logging in.";
                 header("Location: login.php");
                 exit();
