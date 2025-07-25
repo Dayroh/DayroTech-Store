@@ -270,7 +270,13 @@ if (isset($_POST['login_btn'])) {
       <h1>Welcome Back</h1>
       <p>Sign in to access your DayrohTech account</p>
     </div>
-    
+    <?php
+if (isset($_SESSION['status'])) {
+    echo "<p style='color:green;'>".$_SESSION['status']."</p>";
+    unset($_SESSION['status']);
+}
+?>
+
     <div class="login-form">
       <?php if (!empty($error)): ?>
         <div class="error-message">
