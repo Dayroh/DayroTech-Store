@@ -16,7 +16,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $row = $result->fetch_assoc();
 
         if (password_verify($password, $row['password'])) {
-
             if ($row['is_verified'] != 1) {
                 $_SESSION['status'] = "Please verify your email before logging in.";
                 header("Location: login.php");
@@ -29,32 +28,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['role'] = $row['role'];
 
             if ($row['role'] === 'admin') {
-                header("Location: admindashboard.php");
+                header("Location: admin_dashboard.php");
             } else {
                 header("Location: users.php");
             }
             exit();
-
-        } else {
-            $_SESSION['status'] = "Invalid email or password.";
-            header("Location: login.php");
-            exit();
-        }
-    } else {
-        $_SESSION['status'] = "Invalid email or password.";
-        header("Location: login.php");
-        exit();
-    }
-}
-
-
-            // Login success
-            $_SESSION['id'] = $row['id'];
-            $_SESSION['email'] = $row['email'];
-            $_SESSION['role'] = $row['role'];
-            header("Location: dashboard.php");
-            exit();
-
         } else {
             $_SESSION['status'] = "Invalid email or password.";
             header("Location: login.php");
@@ -67,7 +45,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 ?>
-
 
 
 <!DOCTYPE html>
