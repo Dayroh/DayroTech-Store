@@ -1,47 +1,63 @@
 <?php
 session_start();
-include('config.php'); // Your DB connection
-include 'includes/mail.php'; // PHPMailer setup
+require 'vendor/autoload.php'; // PHPMailer
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $email = $_POST['email'];
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
-    // 1. Check if email exists
-    $stmt = $conn->prepare("SELECT name, verify_token, is_verified FROM users WHERE email = ?");
+include 'config.php'; // adjust if your DB config is somewhere else
+
+if (isset($_SESSION['email'])) {
+    $email = $_SESSION['email'];
+
+    $query = "SELECT * FROM users WHERE email = ?";
+    $stmt = $conn->prepare($query);
     $stmt->bind_param("s", $email);
     $stmt->execute();
-    $stmt->bind_result($name, $verify_token, $is_verified);
-    $stmt->fetch();
-    $stmt->close();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
 
-    if ($name) {
-        if ($is_verified == 1) {
-            $_SESSION['status'] = "Your account is already verified.";
-        } else {
-            // Resend email
+    if ($user && !$user['is_verified']) {
+        $verify_token = $user['verify_token'];
+
+        // Send the email
+        $mail = new PHPMailer(true);
+        try {
+            //Server settings
+            $mail->isSMTP();
+            $mail->Host       = 'smtp.gmail.com'; // your SMTP
+            $mail->SMTPAuth   = true;
+            $mail->Username   = 'kendayroh1@gmail.com'; // your Gmail
+            $mail->Password   = 'chej piuz elqp lxxu'; // your app password
+            $mail->SMTPSecure = 'tls';
+            $mail->Port       = 587;
+
+            //Recipients
+            $mail->setFrom('your-email@gmail.com', 'DayrohTech');
             $mail->addAddress($email);
-            $mail->Subject = "Verify your email address";
+
+            // Content
             $mail->isHTML(true);
-            $mail->Body = "
-                <h2>Welcome back, $name!</h2>
-                <p>Please click the link below to verify your email:</p>
+            $mail->Subject = "Resend: Verify your email address";
+            $mail->Body    = "
+                <h2>Verify your email</h2>
+                <p>Click the link below to verify:</p>
                 <a href='https://dayrotech-store-production.up.railway.app/app/verify.php?token=$verify_token'>Verify Email</a>
             ";
 
-            if ($mail->send()) {
-                $_SESSION['status'] = "Verification email resent. Check your inbox.";
-            } else {
-                $_SESSION['status'] = "Email could not be sent. Please try again.";
-            }
+            $mail->send();
+            echo "Verification email resent successfully!";
+        } catch (Exception $e) {
+            echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
         }
     } else {
-        $_SESSION['status'] = "No account found with that email.";
+        echo "Either user not found or already verified.";
     }
-
-    header("Location: resend-verification.php");
-    exit();
+} else {
+    echo "You're not logged in.";
 }
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
