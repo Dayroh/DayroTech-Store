@@ -73,7 +73,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $mail->Body    = "
                 <h2>Welcome to DayrohTech</h2>
                 <p>Please click the link below to verify your email:</p>
-                <a href='http://localhost/app/verify.php?token=$verify_token'>Verify Email</a>
+               <a href='https://dayrotech-store-production.up.railway.app/app/verify.php?token=$verify_token'>Verify Email</a>
+
             ";
 
             $mail->send();
