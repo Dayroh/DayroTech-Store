@@ -1,52 +1,48 @@
 <?php
 session_start();
-require 'config.php'; // your DB connection file
+require_once "db.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
 
-    // Prepare SQL statement to fetch user
     $query = "SELECT * FROM users WHERE email = ?";
     $stmt = $conn->prepare($query);
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
 
-    // Check if user exists
     if ($result->num_rows === 1) {
-        $user = $result->fetch_assoc();
+        $row = $result->fetch_assoc();
 
-        // Verify password
-        if (password_verify($password, $user['password'])) {
+        if (password_verify($password, $row['password'])) {
 
-            // Check if email is verified
-            if ($user['email_verified'] == 1) {
-                $_SESSION['user_id'] = $user['id'];
-                $_SESSION['email'] = $user['email'];
-                $_SESSION['role'] = $user['role'];
-
-                header("Location: dashboard.php");
-                exit();
-            } else {
+            if ($row['email_verified'] != 1) {
                 $_SESSION['status'] = "Please verify your email before logging in.";
                 header("Location: login.php");
                 exit();
             }
 
+            // Login success
+            $_SESSION['id'] = $row['id'];
+            $_SESSION['email'] = $row['email'];
+            $_SESSION['role'] = $row['role'];
+            header("Location: dashboard.php");
+            exit();
+
         } else {
-            $_SESSION['status'] = "Incorrect password.";
+            $_SESSION['status'] = "Invalid email or password.";
             header("Location: login.php");
             exit();
         }
-
     } else {
-        $_SESSION['status'] = "Account not found.";
+        $_SESSION['status'] = "Invalid email or password.";
         header("Location: login.php");
         exit();
     }
 }
 ?>
+
 
 
 <!DOCTYPE html>
@@ -282,9 +278,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <h1>Welcome Back</h1>
       <p>Sign in to access your DayrohTech account</p>
     </div>
-   <?php
+ <?php
+session_start();
 if (isset($_SESSION['status'])) {
-    echo "<p style='color:red;'>".$_SESSION['status']."</p>";
+    echo "<p style='color:red;'>" . $_SESSION['status'] . "</p>";
     unset($_SESSION['status']);
 }
 ?>
