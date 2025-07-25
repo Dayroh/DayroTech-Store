@@ -1,41 +1,53 @@
 <?php
 session_start();
-include 'config.php';
+require 'config.php'; // your DB connection file
 
-$error = '';
-
-if (isset($_POST['login_btn'])) {
-    $email = strtolower(trim($_POST['email']));
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $email = trim($_POST['email']);
     $password = $_POST['password'];
 
-    $stmt = $conn->prepare("SELECT * FROM users WHERE email = ? LIMIT 1");
+    // Prepare SQL statement to fetch user
+    $query = "SELECT * FROM users WHERE email = ?";
+    $stmt = $conn->prepare($query);
     $stmt->bind_param("s", $email);
     $stmt->execute();
-    $res = $stmt->get_result();
+    $result = $stmt->get_result();
 
-    if ($res->num_rows > 0) {
-        $user = $res->fetch_assoc();
+    // Check if user exists
+    if ($result->num_rows === 1) {
+        $user = $result->fetch_assoc();
 
+        // Verify password
         if (password_verify($password, $user['password'])) {
+
+            // Check if email is verified
             if ($user['email_verified'] == 1) {
                 $_SESSION['user_id'] = $user['id'];
-                $_SESSION['user_email'] = $user['email'];
+                $_SESSION['email'] = $user['email'];
+                $_SESSION['role'] = $user['role'];
+
                 header("Location: dashboard.php");
                 exit();
             } else {
-                $error = "Please verify your email before logging in.";
+                $_SESSION['status'] = "Please verify your email before logging in.";
+                header("Location: login.php");
+                exit();
             }
+
         } else {
-            $error = "Invalid credentials.";
+            $_SESSION['status'] = "Incorrect password.";
+            header("Location: login.php");
+            exit();
         }
+
     } else {
-        $error = "Account not found.";
+        $_SESSION['status'] = "Account not found.";
+        header("Location: login.php");
+        exit();
     }
 }
 ?>
 
-<!-- Display errors -->
-<?php if (!empty($error)) { echo "<p style='color:red;'>$error</p>"; } ?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -270,12 +282,13 @@ if (isset($_POST['login_btn'])) {
       <h1>Welcome Back</h1>
       <p>Sign in to access your DayrohTech account</p>
     </div>
-    <?php
+   <?php
 if (isset($_SESSION['status'])) {
-    echo "<p style='color:green;'>".$_SESSION['status']."</p>";
+    echo "<p style='color:red;'>".$_SESSION['status']."</p>";
     unset($_SESSION['status']);
 }
 ?>
+
 
     <div class="login-form">
       <?php if (!empty($error)): ?>
