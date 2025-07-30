@@ -34,7 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
         }
 
         // Insert order
-        $stmt = $conn->prepare("INSERT INTO orders (user_id, name, phone, address, email, total) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO orders (user_id, customer_name, phone, address, email, total_price, order_date) VALUES (?, ?, ?, ?, ?, ?, NOW())");
+
         $stmt->bind_param("issssd", $user_id, $name, $phone, $address, $email, $total);
         if ($stmt->execute()) {
             $order_id = $stmt->insert_id;
