@@ -12,15 +12,15 @@ $sql = "
     o.id AS order_id,
     u.name AS customer_name,
     u.email AS customer_email,
-    oi.product_name,
-    oi.quantity,
+    o.product_name,
+    o.quantity,
     o.total_price,
     o.order_date
   FROM orders o
   JOIN users u ON o.user_id = u.id
-  LEFT JOIN order_items oi ON oi.order_id = o.id
   ORDER BY o.order_date DESC
 ";
+
 
 $result = $conn->query($sql);
 ?>
