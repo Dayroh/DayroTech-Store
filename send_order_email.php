@@ -63,9 +63,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <p>We will contact you shortly for delivery.</p>
             <p>Regards,<br>DayrohTech Store</p>
         ";
-        $mailUser->send();
+       $mailUser->send();
+$email_status = 'success'; // <-- THIS is what checkout.php checks for
+return true;
 
-       return true;
 
     } catch (Exception $e) {
         echo "❌ Email Error: " . $e->getMessage();
