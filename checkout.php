@@ -41,12 +41,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
         if ($stmt->execute()) {
             $order_id = $stmt->insert_id;
             $stmt->close();
+// Insert order into database
+$stmt = $conn->prepare("INSERT INTO orders (user_id, customer_name, phone, address, total_price, order_date) VALUES (?, ?, ?, ?, ?, NOW())");
+$stmt->bind_param("isssd", $user_id, $name, $phone, $address, $total);
+$stmt->execute();
 
-            // Insert order items
-            $stmt = $conn->prepare("INSERT INTO order_items (order_id, product_name, price, quantity) VALUES (?, ?, ?, ?)");
-            foreach ($_SESSION['cart'] as $item) {
-                $stmt->bind_param("isdi", $order_id, $item['name'], $item['price'], $item['quantity']);
-                $stmt->execute();
             }
             $stmt->close();
 
