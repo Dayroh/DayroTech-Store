@@ -76,9 +76,15 @@ if (isset($email_status) && $email_status === 'success') {
         } else {
             $error = "❌ Failed to place order. Please try again.";
         }
-    } else {
-        $error = "❌ Missing or invalid order data.";
-    }
+   } else {
+    $error = "❌ Missing or invalid order data.";
+    if (empty($name)) $error .= " Name missing.";
+    if (empty($phone)) $error .= " Phone missing.";
+    if (empty($address)) $error .= " Address missing.";
+    if (empty($email)) $error .= " Email missing.";
+    if (empty($_SESSION['cart'])) $error .= " Cart is empty.";
+}
+
 
 ?>
 
