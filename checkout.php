@@ -40,12 +40,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
         }
         $stmt->close();
 
-        // Clear cart
-        unset($_SESSION['cart']);
+        // Store order ID for success page (optional but useful)
+$_SESSION['last_order_id'] = $order_id;
 
-        // ✅ Redirect to success page
-        header("Location: order_success.php");
-        exit();
+// Clear cart
+unset($_SESSION['cart']);
+
+// ✅ Redirect to success page with query to verify success
+header("Location: order_success.php?order=placed");
+exit();
+
     } else {
         // Optional: Debug
         echo "<pre>";
