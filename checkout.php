@@ -62,7 +62,7 @@ $_POST['email'] = $email;
 $_POST['order_details'] = $order_details;
 
 // Call send_order.php manually
-include 'send_order.php';
+include 'send_order_email.php';
 
             // ✅ Redirect to success page
             header("Location: order_success.php?order=placed");
