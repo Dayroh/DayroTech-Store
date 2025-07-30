@@ -32,6 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $mail->setFrom($email, $name);
             $mail->addAddress('kendayroh1@gmail.com', 'Admin');
+            $mail->addAddress('ochiengtilen5@gmail.com', 'Admin Two'); 
 
             $mail->isHTML(true);
             $mail->Subject = 'New Contact Message';
