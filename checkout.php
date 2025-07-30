@@ -33,12 +33,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
                 $stmt_item->execute();
             }
 
-            // Clear cart
-            unset($_SESSION['cart']);
+          // Include email script
+include 'send_order_email.php'; // This should be at the root
 
-            // Redirect to success page
-            header("Location: order_success.php");
-            exit();
+// Prepare data for the email
+$user_email = $_SESSION['user_email']; // assuming you store this in session
+$user_name = $_SESSION['user_name'] ?? $name; // fallback if not in session
+
+// Send order confirmation to user and notification to admins
+sendOrderEmails($order_id, $user_email, $user_name);
+
+// Clear cart
+unset($_SESSION['cart']);
+
+// Redirect to success page
+header("Location: order_success.php");
+exit();
+
         } else {
             $error = "Failed to place order. Please try again.";
         }
