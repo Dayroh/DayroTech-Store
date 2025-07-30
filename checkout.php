@@ -34,12 +34,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
         }
 
         // Insert order
-        $stmt = $conn->prepare("INSERT INTO orders (user_id, customer_name, phone, address, total_price, order_date) VALUES (?, ?, ?, ?, ?, NOW())");
-        $stmt->bind_param("isssd", $user_id, $name, $phone, $address, $total);
+      $order_date = date('Y-m-d H:i:s');
 
-        if ($stmt->execute()) {
-            $order_id = $stmt->insert_id;
-            $stmt->close();
+foreach ($_SESSION['cart'] as $item) {
+    $product_name = $item['name'];
+    $quantity = $item['quantity'];
+    $price = $item['price'];
+    $subtotal = $price * $quantity;
+
+    $stmt = $conn->prepare("INSERT INTO orders (user_id, customer_name, phone, address, product_name, quantity, total_price, order_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("issssids", $user_id, $name, $phone, $address, $product_name, $quantity, $subtotal, $order_date);
+    $stmt->execute();
+}
+
 
             // Build order details
             $order_details = '';
