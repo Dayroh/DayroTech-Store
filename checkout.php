@@ -79,7 +79,7 @@ if (isset($email_status) && $email_status === 'success') {
     } else {
         $error = "❌ Missing or invalid order data.";
     }
-}
+
 ?>
 
 
