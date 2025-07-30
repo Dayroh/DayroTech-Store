@@ -8,15 +8,20 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'user') {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
-   $name = htmlspecialchars(trim($_POST['name'] ?? ''));
-$phone = htmlspecialchars(trim($_POST['phone'] ?? ''));
-$address = htmlspecialchars(trim($_POST['address'] ?? ''));
+    // Sanitize and validate inputs manually (FILTER_SANITIZE_STRING is deprecated)
+    $name = htmlspecialchars(trim($_POST['name'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $phone = htmlspecialchars(trim($_POST['phone'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $address = htmlspecialchars(trim($_POST['address'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $email = trim($_POST['email'] ?? '');
 
-$email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL); // Added line
-$user_id = $_SESSION['user_id'];
+    // Validate email
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $email = '';
+    }
 
+    $user_id = $_SESSION['user_id'];
 
-    if (!empty($name) && !empty($phone) && !empty($address) && !empty($_SESSION['cart'])) {
+    if (!empty($name) && !empty($phone) && !empty($address) && !empty($email) && !empty($_SESSION['cart'])) {
         $total = 0;
         foreach ($_SESSION['cart'] as $item) {
             $total += $item['price'] * $item['quantity'];
@@ -29,37 +34,34 @@ $user_id = $_SESSION['user_id'];
         if ($stmt->execute()) {
             $order_id = $stmt->insert_id;
 
-            // Insert each item
+            // Insert each cart item
             $stmt_item = $conn->prepare("INSERT INTO order_items (order_id, product_name, quantity, price) VALUES (?, ?, ?, ?)");
             foreach ($_SESSION['cart'] as $item) {
                 $stmt_item->bind_param("isid", $order_id, $item['name'], $item['quantity'], $item['price']);
                 $stmt_item->execute();
             }
 
-          // Include email script
-include 'send_order_email.php'; // This should be at the root
+            // Include email sending script
+            include 'send_order_email.php';
 
-// Prepare data for the email
-$user_email = $customer_email = $email;
+            // Prepare data for the email
+            $user_email = $email;
+            $user_name = $name;
 
-$user_name = $name;
+            // Send order confirmation and admin notification
+            sendOrderEmails($order_id, $user_email, $user_name);
 
+            // Clear cart
+            unset($_SESSION['cart']);
 
-// Send order confirmation to user and notification to admins
-sendOrderEmails($order_id, $user_email, $user_name);
-
-// Clear cart
-unset($_SESSION['cart']);
-
-// Redirect to success page
-header("Location: order_success.php");
-exit();
-
+            // Redirect to success page
+            header("Location: order_success.php");
+            exit();
         } else {
-            $error = "Failed to place order. Please try again.";
+            $error = "❌ Failed to place order. Please try again.";
         }
     } else {
-        $error = "Please fill all fields and make sure your cart is not empty.";
+        $error = "❌ Missing or invalid order data.";
     }
 }
 ?>
