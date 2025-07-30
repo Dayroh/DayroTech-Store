@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mail->Port = 587;
 
             $mail->setFrom($email, $name);
-            $mail->addAddress('admin@dayrohtech.com', 'Admin');
+            $mail->addAddress('kendayroh1@gmail.com', 'Admin');
 
             $mail->isHTML(true);
             $mail->Subject = 'New Contact Message';
