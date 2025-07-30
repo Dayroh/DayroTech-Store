@@ -48,11 +48,22 @@ $stmt->execute();
             }
             $stmt->close();
 
-            $_SESSION['last_order_id'] = $order_id;
-            unset($_SESSION['cart']);
-// Build order details string
+            // Build order details
 $order_details = '';
 foreach ($_SESSION['cart'] as $item) {
+    $order_details .= $item['name'] . ' × ' . $item['quantity'] . ' - Ksh ' . number_format($item['price'] * $item['quantity']) . "<br>";
+}
+
+// Send email
+$_POST['name'] = $name;
+$_POST['email'] = $email;
+$_POST['order_details'] = $order_details;
+include 'send_order_email.php';
+
+// Only after email is sent, clear cart
+$_SESSION['last_order_id'] = $order_id;
+unset($_SESSION['cart']);
+
     $order_details .= $item['name'] . ' × ' . $item['quantity'] . ' - Ksh ' . number_format($item['price'] * $item['quantity']) . "<br>";
 }
 
