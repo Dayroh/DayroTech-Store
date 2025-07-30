@@ -61,7 +61,7 @@ $stmt->execute();
     } else {
         $error = "❌ Missing or invalid order data.";
     }
-}
+
 ?>
 
 <!DOCTYPE html>
