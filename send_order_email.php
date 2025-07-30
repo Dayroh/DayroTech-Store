@@ -65,7 +65,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         ";
         $mailUser->send();
 
-        echo "✅ Order submitted and emails sent successfully!";
+       return true;
+
     } catch (Exception $e) {
         echo "❌ Email Error: " . $e->getMessage();
     }
