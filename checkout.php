@@ -8,10 +8,12 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'user') {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
-    $name = trim($_POST['name']);
-    $phone = trim($_POST['phone']);
-    $address = trim($_POST['address']);
-    $user_id = $_SESSION['user_id'];
+   $name = filter_input(INPUT_POST, 'name', FILTER_SANITIZE_STRING);
+$phone = filter_input(INPUT_POST, 'phone', FILTER_SANITIZE_STRING);
+$address = filter_input(INPUT_POST, 'address', FILTER_SANITIZE_STRING);
+$email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL); // Added line
+$user_id = $_SESSION['user_id'];
+
 
     if (!empty($name) && !empty($phone) && !empty($address) && !empty($_SESSION['cart'])) {
         $total = 0;
@@ -37,7 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
 include 'send_order_email.php'; // This should be at the root
 
 // Prepare data for the email
-$user_email = $customer_email = $_POST['email'] ?? '';
+$user_email = $customer_email = $email;
+
 $user_name = $name;
 
 
