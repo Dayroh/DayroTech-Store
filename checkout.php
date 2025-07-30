@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
 include 'send_order_email.php'; // This should be at the root
 
 // Prepare data for the email
-$user_email = $name;  // from form
+$user_email = $customer_email = $_POST['email'] ?? '';
 $user_name = $name;
 
 
@@ -233,6 +233,11 @@ exit();
           <label class="form-label">Phone Number</label>
           <input type="text" name="phone" class="form-control" required placeholder="Enter your phone number">
         </div>
+          <div class="mb-3">
+  <label class="form-label">Email Address</label>
+  <input type="email" name="email" class="form-control" required placeholder="Enter your email">
+</div>
+
         <div class="mb-3">
           <label class="form-label">Delivery Address</label>
           <textarea name="address" class="form-control" required rows="3" placeholder="Enter your complete delivery address"></textarea>
