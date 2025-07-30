@@ -35,47 +35,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
 
         // Insert order
         $stmt = $conn->prepare("INSERT INTO orders (user_id, customer_name, phone, address, total_price, order_date) VALUES (?, ?, ?, ?, ?, NOW())");
-$stmt->bind_param("isssd", $user_id, $name, $phone, $address, $total);
+        $stmt->bind_param("isssd", $user_id, $name, $phone, $address, $total);
 
         if ($stmt->execute()) {
             $order_id = $stmt->insert_id;
             $stmt->close();
-// Insert order into database
-$stmt = $conn->prepare("INSERT INTO orders (user_id, customer_name, phone, address, total_price, order_date) VALUES (?, ?, ?, ?, ?, NOW())");
-$stmt->bind_param("isssd", $user_id, $name, $phone, $address, $total);
-$stmt->execute();
-
-            }
-            $stmt->close();
 
             // Build order details
-$order_details = '';
-foreach ($_SESSION['cart'] as $item) {
-    $order_details .= $item['name'] . ' × ' . $item['quantity'] . ' - Ksh ' . number_format($item['price'] * $item['quantity']) . "<br>";
-}
+            $order_details = '';
+            foreach ($_SESSION['cart'] as $item) {
+                $order_details .= $item['name'] . ' × ' . $item['quantity'] . ' - Ksh ' . number_format($item['price'] * $item['quantity']) . "<br>";
+            }
 
-// Send email
-$_POST['name'] = $name;
-$_POST['email'] = $email;
-$_POST['order_details'] = $order_details;
-include 'send_order_email.php';
+            // Send email
+            $_POST['name'] = $name;
+            $_POST['email'] = $email;
+            $_POST['order_details'] = $order_details;
+            include 'send_order_email.php';
 
-// Only after email is sent, clear cart
-$_SESSION['last_order_id'] = $order_id;
-unset($_SESSION['cart']);
+            // After email is sent, clear cart and redirect
+            $_SESSION['last_order_id'] = $order_id;
+            unset($_SESSION['cart']);
 
-    $order_details .= $item['name'] . ' × ' . $item['quantity'] . ' - Ksh ' . number_format($item['price'] * $item['quantity']) . "<br>";
-}
-
-// Manually send email by posting to send_order.php
-$_POST['name'] = $name;
-$_POST['email'] = $email;
-$_POST['order_details'] = $order_details;
-
-// Call send_order.php manually
-include 'send_order_email.php';
-
-            // ✅ Redirect to success page
             header("Location: order_success.php?order=placed");
             exit();
         } else {
@@ -84,8 +65,9 @@ include 'send_order_email.php';
     } else {
         $error = "❌ Missing or invalid order data.";
     }
-
+}
 ?>
+
 
 <!DOCTYPE html>
 <html>
