@@ -50,6 +50,19 @@ $stmt->execute();
 
             $_SESSION['last_order_id'] = $order_id;
             unset($_SESSION['cart']);
+// Build order details string
+$order_details = '';
+foreach ($_SESSION['cart'] as $item) {
+    $order_details .= $item['name'] . ' × ' . $item['quantity'] . ' - Ksh ' . number_format($item['price'] * $item['quantity']) . "<br>";
+}
+
+// Manually send email by posting to send_order.php
+$_POST['name'] = $name;
+$_POST['email'] = $email;
+$_POST['order_details'] = $order_details;
+
+// Call send_order.php manually
+include 'send_order.php';
 
             // ✅ Redirect to success page
             header("Location: order_success.php?order=placed");
