@@ -37,8 +37,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
 include 'send_order_email.php'; // This should be at the root
 
 // Prepare data for the email
-$user_email = $_SESSION['user_email']; // assuming you store this in session
-$user_name = $_SESSION['user_name'] ?? $name; // fallback if not in session
+$user_email = $name;  // from form
+$user_name = $name;
+
 
 // Send order confirmation to user and notification to admins
 sendOrderEmails($order_id, $user_email, $user_name);
