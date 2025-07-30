@@ -76,7 +76,7 @@ if (isset($email_status) && $email_status === 'success') {
         } else {
             $error = "❌ Failed to place order. Please try again.";
         }
-   } else {
+   } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $error = "❌ Missing or invalid order data.";
     if (empty($name)) $error .= " Name missing.";
     if (empty($phone)) $error .= " Phone missing.";
@@ -84,6 +84,7 @@ if (isset($email_status) && $email_status === 'success') {
     if (empty($email)) $error .= " Email missing.";
     if (empty($_SESSION['cart'])) $error .= " Cart is empty.";
 }
+
 
 
 ?>
