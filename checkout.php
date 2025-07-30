@@ -2,22 +2,30 @@
 session_start();
 include 'config.php';
 
+// Show PHP errors (only in development)
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'user') {
     header("Location: login.php");
     exit();
 }
 
+$error = "";
+
+// Form submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
     $name = trim($_POST['name'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
     $address = trim($_POST['address'] ?? '');
     $email = trim($_POST['email'] ?? '');
+    $user_id = $_SESSION['user_id'];
 
+    // Validate email
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $email = '';
     }
-
-    $user_id = $_SESSION['user_id'];
 
     if (!empty($name) && !empty($phone) && !empty($address) && !empty($email) && !empty($_SESSION['cart'])) {
         $total = 0;
@@ -28,40 +36,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
         // Insert order
         $stmt = $conn->prepare("INSERT INTO orders (user_id, name, phone, address, email, total) VALUES (?, ?, ?, ?, ?, ?)");
         $stmt->bind_param("issssd", $user_id, $name, $phone, $address, $email, $total);
-        $stmt->execute();
-        $order_id = $stmt->insert_id;
-        $stmt->close();
+        if ($stmt->execute()) {
+            $order_id = $stmt->insert_id;
+            $stmt->close();
 
-        // Insert order items
-        $stmt = $conn->prepare("INSERT INTO order_items (order_id, product_name, price, quantity) VALUES (?, ?, ?, ?)");
-        foreach ($_SESSION['cart'] as $item) {
-            $stmt->bind_param("isdi", $order_id, $item['name'], $item['price'], $item['quantity']);
-            $stmt->execute();
+            // Insert order items
+            $stmt = $conn->prepare("INSERT INTO order_items (order_id, product_name, price, quantity) VALUES (?, ?, ?, ?)");
+            foreach ($_SESSION['cart'] as $item) {
+                $stmt->bind_param("isdi", $order_id, $item['name'], $item['price'], $item['quantity']);
+                $stmt->execute();
+            }
+            $stmt->close();
+
+            $_SESSION['last_order_id'] = $order_id;
+            unset($_SESSION['cart']);
+
+            // ✅ Redirect to success page
+            header("Location: order_success.php?order=placed");
+            exit();
+        } else {
+            $error = "❌ Failed to place order. Please try again.";
         }
-        $stmt->close();
-
-        // Store order ID for success page (optional but useful)
-$_SESSION['last_order_id'] = $order_id;
-
-// Clear cart
-unset($_SESSION['cart']);
-
-// ✅ Redirect to success page with query to verify success
-header("Location: order_success.php?order=placed");
-exit();
-
     } else {
-        // Optional: Debug
-        echo "<pre>";
-        print_r($_POST);
-        print_r($_SESSION['cart'] ?? 'No cart');
-        echo "</pre>";
-        echo "<p style='color:red;'>❌ Missing or invalid order data.</p>";
+        $error = "❌ Missing or invalid order data.";
     }
-} else {
-    // Accessing this page without POST
-    header("Location: cart.php");
-    exit();
 }
 ?>
 
