@@ -8,60 +8,59 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'user') {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
-    // Sanitize and validate inputs manually (FILTER_SANITIZE_STRING is deprecated)
-    $name = htmlspecialchars(trim($_POST['name'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $phone = htmlspecialchars(trim($_POST['phone'] ?? ''), ENT_QUOTES, 'UTF-8');
-    $address = htmlspecialchars(trim($_POST['address'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $name = trim($_POST['name'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
+    $address = trim($_POST['address'] ?? '');
     $email = trim($_POST['email'] ?? '');
 
-    // Validate email
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $email = '';
     }
 
     $user_id = $_SESSION['user_id'];
 
-    if (!empty($name) && !empty($phone) && !empty($address) && !empty($email) && !empty($_SESSION['cart'])) {
-        $total = 0;
+    // DEBUG BLOCK
+    if (empty($name) || empty($phone) || empty($address) || empty($email) || empty($_SESSION['cart'])) {
+        echo "<pre>";
+        print_r([
+            'name' => $name,
+            'phone' => $phone,
+            'address' => $address,
+            'email' => $email,
+            'cart' => $_SESSION['cart'] ?? 'Cart not set'
+        ]);
+        echo "</pre>";
+        exit("❌ Missing or invalid order data.");
+    }
+
+    $total = 0;
+    foreach ($_SESSION['cart'] as $item) {
+        $total += $item['price'] * $item['quantity'];
+    }
+
+    // Save order
+    $stmt = $conn->prepare("INSERT INTO orders (customer_name, phone, address, total_price, order_date, user_id) VALUES (?, ?, ?, ?, NOW(), ?)");
+    $stmt->bind_param("sssdi", $name, $phone, $address, $total, $user_id);
+
+    if ($stmt->execute()) {
+        $order_id = $stmt->insert_id;
+
+        $stmt_item = $conn->prepare("INSERT INTO order_items (order_id, product_name, quantity, price) VALUES (?, ?, ?, ?)");
         foreach ($_SESSION['cart'] as $item) {
-            $total += $item['price'] * $item['quantity'];
+            $stmt_item->bind_param("isid", $order_id, $item['name'], $item['quantity'], $item['price']);
+            $stmt_item->execute();
         }
 
-        // Insert into orders table
-        $stmt = $conn->prepare("INSERT INTO orders (customer_name, phone, address, total_price, order_date, user_id) VALUES (?, ?, ?, ?, NOW(), ?)");
-        $stmt->bind_param("sssdi", $name, $phone, $address, $total, $user_id);
+        // Email
+        include 'send_order_email.php';
+        sendOrderEmails($order_id, $email, $name);
 
-        if ($stmt->execute()) {
-            $order_id = $stmt->insert_id;
-
-            // Insert each cart item
-            $stmt_item = $conn->prepare("INSERT INTO order_items (order_id, product_name, quantity, price) VALUES (?, ?, ?, ?)");
-            foreach ($_SESSION['cart'] as $item) {
-                $stmt_item->bind_param("isid", $order_id, $item['name'], $item['quantity'], $item['price']);
-                $stmt_item->execute();
-            }
-
-            // Include email sending script
-            include 'send_order_email.php';
-
-            // Prepare data for the email
-            $user_email = $email;
-            $user_name = $name;
-
-            // Send order confirmation and admin notification
-            sendOrderEmails($order_id, $user_email, $user_name);
-
-            // Clear cart
-            unset($_SESSION['cart']);
-
-            // Redirect to success page
-            header("Location: order_success.php");
-            exit();
-        } else {
-            $error = "❌ Failed to place order. Please try again.";
-        }
+        // Clear cart
+        unset($_SESSION['cart']);
+        header("Location: order_success.php");
+        exit();
     } else {
-        $error = "❌ Missing or invalid order data.";
+        $error = "❌ Failed to place order. Try again.";
     }
 }
 ?>
