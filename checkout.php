@@ -8,9 +8,10 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'user') {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
-   $name = filter_input(INPUT_POST, 'name', FILTER_SANITIZE_STRING);
-$phone = filter_input(INPUT_POST, 'phone', FILTER_SANITIZE_STRING);
-$address = filter_input(INPUT_POST, 'address', FILTER_SANITIZE_STRING);
+   $name = htmlspecialchars(trim($_POST['name'] ?? ''));
+$phone = htmlspecialchars(trim($_POST['phone'] ?? ''));
+$address = htmlspecialchars(trim($_POST['address'] ?? ''));
+
 $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL); // Added line
 $user_id = $_SESSION['user_id'];
 
