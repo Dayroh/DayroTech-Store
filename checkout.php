@@ -19,49 +19,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
 
     $user_id = $_SESSION['user_id'];
 
-    // DEBUG BLOCK
-    if (empty($name) || empty($phone) || empty($address) || empty($email) || empty($_SESSION['cart'])) {
-        echo "<pre>";
-        print_r([
-            'name' => $name,
-            'phone' => $phone,
-            'address' => $address,
-            'email' => $email,
-            'cart' => $_SESSION['cart'] ?? 'Cart not set'
-        ]);
-        echo "</pre>";
-        exit("❌ Missing or invalid order data.");
-    }
-
-    $total = 0;
-    foreach ($_SESSION['cart'] as $item) {
-        $total += $item['price'] * $item['quantity'];
-    }
-
-    // Save order
-    $stmt = $conn->prepare("INSERT INTO orders (customer_name, phone, address, total_price, order_date, user_id) VALUES (?, ?, ?, ?, NOW(), ?)");
-    $stmt->bind_param("sssdi", $name, $phone, $address, $total, $user_id);
-
-    if ($stmt->execute()) {
-        $order_id = $stmt->insert_id;
-
-        $stmt_item = $conn->prepare("INSERT INTO order_items (order_id, product_name, quantity, price) VALUES (?, ?, ?, ?)");
+    if (!empty($name) && !empty($phone) && !empty($address) && !empty($email) && !empty($_SESSION['cart'])) {
+        $total = 0;
         foreach ($_SESSION['cart'] as $item) {
-            $stmt_item->bind_param("isid", $order_id, $item['name'], $item['quantity'], $item['price']);
-            $stmt_item->execute();
+            $total += $item['price'] * $item['quantity'];
         }
 
-        // Email
-        include 'send_order_email.php';
-        sendOrderEmails($order_id, $email, $name);
+        // Insert order
+        $stmt = $conn->prepare("INSERT INTO orders (user_id, name, phone, address, email, total) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("issssd", $user_id, $name, $phone, $address, $email, $total);
+        $stmt->execute();
+        $order_id = $stmt->insert_id;
+        $stmt->close();
+
+        // Insert order items
+        $stmt = $conn->prepare("INSERT INTO order_items (order_id, product_name, price, quantity) VALUES (?, ?, ?, ?)");
+        foreach ($_SESSION['cart'] as $item) {
+            $stmt->bind_param("isdi", $order_id, $item['name'], $item['price'], $item['quantity']);
+            $stmt->execute();
+        }
+        $stmt->close();
 
         // Clear cart
         unset($_SESSION['cart']);
+
+        // ✅ Redirect to success page
         header("Location: order_success.php");
         exit();
     } else {
-        $error = "❌ Failed to place order. Try again.";
+        // Optional: Debug
+        echo "<pre>";
+        print_r($_POST);
+        print_r($_SESSION['cart'] ?? 'No cart');
+        echo "</pre>";
+        echo "<p style='color:red;'>❌ Missing or invalid order data.</p>";
     }
+} else {
+    // Accessing this page without POST
+    header("Location: cart.php");
+    exit();
 }
 ?>
 
