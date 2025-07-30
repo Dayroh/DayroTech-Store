@@ -46,19 +46,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
             foreach ($_SESSION['cart'] as $item) {
                 $order_details .= $item['name'] . ' × ' . $item['quantity'] . ' - Ksh ' . number_format($item['price'] * $item['quantity']) . "<br>";
             }
+// Send email
+$_POST['name'] = $name;
+$_POST['email'] = $email;
+$_POST['order_details'] = $order_details;
 
-            // Send email
-            $_POST['name'] = $name;
-            $_POST['email'] = $email;
-            $_POST['order_details'] = $order_details;
-            include 'send_order_email.php';
+ob_start(); // Prevent any accidental output from included file
+include 'send_order_email.php';
+ob_end_clean();
 
-            // After email is sent, clear cart and redirect
-            $_SESSION['last_order_id'] = $order_id;
-            unset($_SESSION['cart']);
+if (isset($email_status) && $email_status === 'success') {
+    // After email is sent, clear cart and redirect
+    $_SESSION['last_order_id'] = $order_id;
+    unset($_SESSION['cart']);
 
-            header("Location: order_success.php?order=placed");
-            exit();
+    header("Location: order_success.php?order=placed");
+    exit();
+} else {
+    $error = "⚠️ Order saved, but failed to send email.";
+}
+
         } else {
             $error = "❌ Failed to place order. Please try again.";
         }
