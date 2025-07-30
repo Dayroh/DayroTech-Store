@@ -69,7 +69,9 @@ return true;
 
 
     } catch (Exception $e) {
-        echo "❌ Email Error: " . $e->getMessage();
+        $email_status = 'failed';
+error_log("Email Error: " . $e->getMessage()); // logs error safely
+
     }
 }
 ?>
